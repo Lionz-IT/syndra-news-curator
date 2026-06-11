@@ -12,11 +12,11 @@ Energy & Sustainability remains a featured vertical with SDG tracking, but Syndr
 
 ```
 ┌─────────────┐    ┌──────────────┐    ┌────────────────────────┐
-│   Frontend   │───▶│   FastAPI     │───▶│  PostgreSQL + Redis    │
-│  React + TS  │    │   Backend    │    │  (data + cache)        │
-│  Vite + TW   │    │              │    └────────────────────────┘
-└─────────────┘    │  NLP Pipeline │───▶ Hugging Face Inference API
-                   │  Aggregator   │───▶ NewsAPI / Guardian / RSS / ...
+│   Frontend  │───▶│   FastAPI    │──▶│  PostgreSQL + Redis    │
+│  React + TS │    │   Backend    │    │  (data + cache)        │
+│  Vite + TW  │    │              │    └────────────────────────┘
+└─────────────┘    │  NLP Pipeline│───▶ Hugging Face Inference API
+                   │  Aggregator  │───▶ NewsAPI / Guardian / RSS / ...
                    └──────────────┘
 ```
 
