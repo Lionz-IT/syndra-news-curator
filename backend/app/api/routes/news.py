@@ -152,3 +152,46 @@ async def get_article(
         raise HTTPException(status_code=404, detail="Article not found")
 
     return ArticleRead.model_validate(article)
+
+
+@router.post("/{article_id}/analyze", response_model=ArticleRead)
+async def analyze_article(
+    article_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> ArticleRead:
+    """Manually trigger AI bias analysis for a specific article."""
+    from uuid import UUID as PyUUID
+
+    from fastapi import HTTPException
+    
+    from app.services.bias_analyzer import analyze_article_bias
+
+    try:
+        uid = PyUUID(article_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid article ID format")
+
+    stmt = (
+        select(Article)
+        .where(Article.id == uid)
+        .options(selectinload(Article.categories))
+    )
+    result = await db.execute(stmt)
+    article = result.scalar_one_or_none()
+
+    if article is None:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    bias_result = await analyze_article_bias(
+        title=article.title,
+        body=article.body,
+        summary=article.summary,
+    )
+
+    article.bias_score = bias_result.score
+    article.bias_label = bias_result.label
+    
+    await db.commit()
+    await db.refresh(article)
+
+    return ArticleRead.model_validate(article)

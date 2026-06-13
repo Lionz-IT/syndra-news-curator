@@ -64,30 +64,19 @@ docker-compose up -d
 
 Or install PostgreSQL and Redis locally.
 
-### 3. Backend
+### 3. Run Backend & Frontend (Single Terminal)
+
+From the project root directory, install dependencies and run both servers simultaneously using `concurrently`:
 
 ```bash
-cd backend
-python -m venv venv
-# Windows: .\venv\Scripts\activate
-# macOS/Linux: source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-API docs at [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### 4. Frontend
-
-```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-App at [http://localhost:5173](http://localhost:5173)
+* Backend runs at: [http://localhost:8000/docs](http://localhost:8000/docs)
+* Frontend runs at: [http://localhost:5173](http://localhost:5173)
 
-### 5. Run tests
+### 4. Run tests
 
 ```bash
 # Backend
@@ -152,9 +141,9 @@ See [`.env.example`](.env.example) for the full list.
 ## Development Roadmap
 
 - [x] **Phase 0** — Project scaffold, hello world end-to-end
-- [ ] **Phase 1** — Data layer & news aggregation (15+ sources, all categories)
-- [ ] **Phase 2** — Core frontend (news feed, category navigation, filters, search, i18n)
-- [ ] **Phase 3** — AI bias detection engine (universal, all domains)
+- [x] **Phase 1** — Data layer & news aggregation (15+ sources, all categories)
+- [x] **Phase 2** — Core frontend (news feed, category navigation, filters, search, i18n)
+- [x] **Phase 3** — AI bias detection engine (universal, all domains)
 - [ ] **Phase 4** — Summarization (RAG) + SDG mapping (energy vertical) + category classifier
 - [ ] **Phase 5** — Personalization, auth, glossary, TTS, full i18n (10+ languages)
 - [ ] **Phase 6** — Hardening, tests, deploy, observability
