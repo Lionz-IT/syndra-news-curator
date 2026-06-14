@@ -26,30 +26,33 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Globe className="h-6 w-6 text-blue-600 dark:text-blue-500" />
-            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm">
+      <div className="container mx-auto px-4 max-w-5xl h-16 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="bg-black dark:bg-white text-white dark:text-black p-1 rounded">
+              <Globe className="h-5 w-5" />
+            </div>
+            <span className="text-xl font-serif font-bold tracking-tight text-gray-900 dark:text-white group-hover:opacity-80 transition-opacity">
               Syndra
             </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link to="/feed" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <Link to="/feed" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("nav.latest_news")}
             </Link>
           </nav>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <button 
-            className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          <Link 
+            to="/feed"
+            className="hidden md:flex p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Search"
           >
             <Search className="h-5 w-5" />
-          </button>
+          </Link>
           <button
             onClick={toggleLanguage}
             className="hidden md:flex items-center gap-1.5 p-2 rounded-full text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors uppercase"
@@ -80,7 +83,7 @@ export default function Header() {
         <div className="md:hidden absolute top-16 left-0 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-4 space-y-4">
           <Link 
             to="/feed" 
-            className="block text-base font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
+            className="block text-base font-medium text-gray-900 dark:text-gray-100 hover:opacity-70"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             {t("nav.latest_news")}
@@ -90,7 +93,7 @@ export default function Header() {
               toggleLanguage();
               setIsMobileMenuOpen(false);
             }}
-            className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 uppercase w-full text-left"
+            className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-gray-100 hover:opacity-70 uppercase w-full text-left"
           >
             <Languages className="h-4 w-4" />
             Language: {i18n.language.substring(0, 2)}

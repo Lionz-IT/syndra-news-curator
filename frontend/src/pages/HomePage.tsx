@@ -1,134 +1,160 @@
-import { useHealth } from "@/hooks/use-health";
-import { useCategories } from "@/hooks/use-categories";
+import { useArticles } from "@/hooks/use-articles";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import ArticleCard from "@/components/ArticleCard";
 
 export default function HomePage() {
-  const { data: health, isLoading: healthLoading, isError: healthError, error } = useHealth();
-  const { data: categoryData, isLoading: categoriesLoading } = useCategories();
+  const { data: latestNews, isLoading } = useArticles({ page_size: 10 });
+  const { data: techNews } = useArticles({ category: "technology", page_size: 30 });
+  const { data: worldNews } = useArticles({ category: "world", page_size: 30 });
+  const { data: businessNews } = useArticles({ category: "business", page_size: 30 });
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 w-full bg-white dark:bg-gray-950 min-h-screen flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-8 w-64 bg-gray-200 dark:bg-gray-800 rounded"></div>
+          <div className="text-gray-400 font-serif">Loading latest editions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const heroArticle = latestNews?.items.find(a => a.image_url) || latestNews?.items[0];
+  const listArticles = latestNews?.items.filter(a => a.id !== heroArticle?.id);
+
+  // Helper untuk mengutamakan artikel bergambar di barisan depan
+  const getBestArticles = (items: any[]) => {
+    if (!items) return [];
+    const withImages = items.filter(a => a.image_url);
+    const withoutImages = items.filter(a => !a.image_url);
+    return [...withImages, ...withoutImages].slice(0, 4);
+  };
 
   return (
-    <div className="flex-1 w-full bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-gray-900">
-      {/* Hero */}
-      <header className="px-4 py-20 text-center">
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-6">
-          Universal News, <br className="hidden md:block"/> Unbiased.
+    <div className="flex-1 w-full bg-white dark:bg-gray-950 font-sans pb-24">
+      <div className="container mx-auto px-4 mt-6 border-b-2 border-black dark:border-white pb-2 mb-8">
+        <h1 className="text-4xl md:text-6xl font-serif font-bold text-center tracking-tight text-gray-900 dark:text-white">
+          Today's Front Page
         </h1>
-        <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10">
-          Syndra aggregates news across every domain and language, providing AI-powered bias detection, smart summaries, and multi-label categorization.
-        </p>
-        <Link 
-          to="/feed" 
-          className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/25"
-        >
-          Read Latest News
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Link>
-      </header>
+      </div>
 
-      <div className="max-w-6xl mx-auto px-4 space-y-12 pb-24">
-        {/* Category Taxonomy Preview */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Explore Topics
-            </h2>
-            <Link to="/feed" className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
-              View all &rarr;
+      <div className="container mx-auto px-4 max-w-7xl">
+        {heroArticle && (
+          <section className="mb-16 border-b border-gray-200 dark:border-gray-800 pb-12">
+            <Link to={`/article/${heroArticle.id}`} className="group block">
+              <div className="flex flex-col md:flex-col gap-6 items-center text-center max-w-4xl mx-auto">
+                <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white leading-tight group-hover:underline decoration-gray-400">
+                  {heroArticle.title}
+                </h2>
+                
+                {heroArticle.image_url && (
+                  <div className="w-full aspect-[21/9] bg-gray-100 dark:bg-gray-900 overflow-hidden">
+                    <img 
+                      src={heroArticle.image_url} 
+                      alt="" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                    />
+                  </div>
+                )}
+                
+                <div className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-serif max-w-3xl line-clamp-3">
+                  {(heroArticle.summary && heroArticle.summary !== "null") 
+                    ? <div dangerouslySetInnerHTML={{ __html: heroArticle.summary }} /> 
+                    : (heroArticle.body && heroArticle.body !== "null")
+                    ? <div dangerouslySetInnerHTML={{ __html: heroArticle.body }} />
+                    : "Klik untuk membaca selengkapnya..."}
+                </div>
+                <div className="text-xs font-sans text-gray-500 uppercase tracking-widest mt-2">
+                  {heroArticle.author ? `BY ${heroArticle.author} · ` : ""}
+                  {heroArticle.source}
+                </div>
+              </div>
+            </Link>
+          </section>
+        )}
+
+        {worldNews && worldNews.items.length > 0 && (
+          <SectionRow title="World News" articles={getBestArticles(worldNews.items)} categorySlug="world" />
+        )}
+
+        {techNews && techNews.items.length > 0 && (
+          <SectionRow title="Technology" articles={getBestArticles(techNews.items)} categorySlug="technology" />
+        )}
+
+        {businessNews && businessNews.items.length > 0 && (
+          <SectionRow title="Business & Finance" articles={getBestArticles(businessNews.items)} categorySlug="business" />
+        )}
+
+        <section className="mt-20 max-w-4xl">
+          <div className="flex items-center gap-4 mb-8">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
+              Latest Updates
+            </h3>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
+          </div>
+          
+          <div className="flex flex-col">
+            {listArticles?.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link 
+              to="/feed" 
+              className="inline-block px-6 py-2 border border-gray-300 dark:border-gray-700 text-sm font-semibold rounded hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+            >
+              Load More Articles
             </Link>
           </div>
-
-          {categoriesLoading && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-24 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-800 animate-pulse"
-                />
-              ))}
-            </div>
-          )}
-
-          {categoryData && categoryData.items.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {categoryData.items.map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/feed/${cat.slug}`}
-                  className="group flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-gray-900 shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-800 p-6 transition-all hover:-translate-y-1"
-                >
-                  <span
-                    className="text-lg font-bold mb-2 group-hover:scale-110 transition-transform"
-                    style={{ color: cat.color ?? undefined }}
-                  >
-                    {cat.name}
-                  </span>
-                  {cat.children.length > 0 && (
-                    <span className="text-xs text-gray-500 font-medium">
-                      {cat.children.length} topics
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {categoryData && categoryData.items.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-12">
-              No categories yet. Wait for the background worker to seed the database.
-            </p>
-          )}
         </section>
 
-        {/* System Status */}
-        <section className="max-w-2xl mx-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur shadow-sm p-6 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              System Status
-            </h2>
-            {healthLoading && (
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
-            )}
-          </div>
-
-          {healthError && (
-            <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-400">
-              <p className="font-bold">Backend unreachable</p>
-              <p className="mt-1 opacity-80">
-                {error instanceof Error ? error.message : "Connection failed"}
-              </p>
-            </div>
-          )}
-
-          {health && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
-                </span>
-                <span className="text-green-700 dark:text-green-400 font-bold">
-                  {health.status}
-                </span>
-              </div>
-              <dl className="grid grid-cols-3 gap-3 text-sm">
-                <div className="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                  <dt className="text-xs text-gray-500 dark:text-gray-400 mb-1">App</dt>
-                  <dd className="font-semibold">{health.app}</dd>
-                </div>
-                <div className="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                  <dt className="text-xs text-gray-500 dark:text-gray-400 mb-1">Version</dt>
-                  <dd className="font-semibold">{health.version}</dd>
-                </div>
-                <div className="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                  <dt className="text-xs text-gray-500 dark:text-gray-400 mb-1">Environment</dt>
-                  <dd className="font-semibold capitalize">{health.environment}</dd>
-                </div>
-              </dl>
-            </div>
-          )}
-        </section>
       </div>
     </div>
+  );
+}
+
+function SectionRow({ title, articles, categorySlug }: { title: string, articles: any[], categorySlug: string }) {
+  return (
+    <section className="mb-12">
+      <div className="flex items-center justify-between border-t-2 border-black dark:border-white pt-2 mb-6">
+        <h3 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+          {title}
+        </h3>
+        <Link to={`/feed/${categorySlug}`} className="text-xs font-sans font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors">
+          More in {title} &rarr;
+        </Link>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {articles.map((article) => (
+          <Link key={article.id} to={`/article/${article.id}`} className="group flex flex-col gap-3">
+            {article.image_url ? (
+              <div className="aspect-[3/2] w-full bg-gray-100 dark:bg-gray-800 overflow-hidden mb-1">
+                <img 
+                  src={article.image_url} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  alt="" 
+                />
+              </div>
+            ) : (
+              <div className="w-full h-1 bg-black dark:bg-white mb-2"></div>
+            )}
+            <div>
+              <h4 className="font-serif font-bold text-gray-900 dark:text-gray-100 leading-snug group-hover:underline decoration-gray-400">
+                {article.title}
+              </h4>
+              <div className="text-sm text-gray-500 dark:text-gray-400 font-serif mt-2 line-clamp-3">
+                {(article.summary && article.summary !== "null") 
+                  ? <div dangerouslySetInnerHTML={{ __html: article.summary }} /> 
+                  : (article.body && article.body !== "null")
+                  ? <div dangerouslySetInnerHTML={{ __html: article.body }} />
+                  : "Read full story..."}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

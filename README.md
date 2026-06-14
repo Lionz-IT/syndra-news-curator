@@ -45,24 +45,39 @@ Each top-level category has **sub-categories** (e.g. Technology → AI, Software
 
 - Python 3.10+
 - Node.js 22+
-- PostgreSQL 16 (or use Docker)
-- Redis 7 (or use Docker)
+- Cloud Database: **Supabase** (PostgreSQL) & **Upstash** (Redis)
 
 ### 1. Clone & configure
 
 ```bash
 git clone <repo-url> && cd syndra
 cp .env.example .env
-# Edit .env with your API keys (all optional — app runs with mock data)
 ```
+Edit `.env` and fill in your Supabase and Upstash connection strings. (All other API keys are optional).
 
-### 2. Start infrastructure (PostgreSQL + Redis)
+### 2. Setup Database (Create Tables)
 
+Since the database is hosted on the cloud, run this once to create the tables:
 ```bash
-docker-compose up -d
-```
+cd backend
+python -m venv venv
+# Windows: .\venv\Scripts\activate
+# macOS/Linux: source venv/bin/activate
+pip install -r requirements.txt
 
-Or install PostgreSQL and Redis locally.
+# Create the tables in your cloud database
+python -c "
+import asyncio
+from app.core.database import engine
+from app.models.base import Base
+async def init_models():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print('Tables created successfully!')
+asyncio.run(init_models())
+"
+cd ..
+```
 
 ### 3. Run Backend & Frontend (Single Terminal)
 

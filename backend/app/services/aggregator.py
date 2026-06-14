@@ -18,6 +18,7 @@ from app.services.adapters.guardian_adapter import GuardianAdapter
 from app.services.adapters.gnews_adapter import GNewsAdapter
 from app.services.adapters.rss_adapter import RSSAdapter
 from app.services.bias_analyzer import analyze_article_bias
+from app.services.nlp_engine import generate_summary, map_sdgs
 
 logger = logging.getLogger(__name__)
 
@@ -118,11 +119,16 @@ async def persist_articles(
         if article_data.content_hash and article_data.content_hash in existing_hashes:
             continue
 
+        full_text = f"{article_data.title}\n\n{article_data.body or ''}\n\n{article_data.summary or ''}"
+        
         bias_result = await analyze_article_bias(
             title=article_data.title,
             body=article_data.body,
             summary=article_data.summary,
         )
+        
+        ai_summary = await generate_summary(full_text)
+        sdg_tags = await map_sdgs(full_text)
 
         # Build ORM object
         article = Article(
@@ -140,6 +146,8 @@ async def persist_articles(
             content_hash=article_data.content_hash,
             bias_score=bias_result.score,
             bias_label=bias_result.label,
+            ai_summary=ai_summary,
+            sdg_tags=sdg_tags,
         )
 
         # Resolve M2M categories

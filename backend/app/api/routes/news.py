@@ -159,12 +159,13 @@ async def analyze_article(
     article_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> ArticleRead:
-    """Manually trigger AI bias analysis for a specific article."""
+    """Manually trigger full AI analysis (Bias, Summary, SDG) for a specific article."""
     from uuid import UUID as PyUUID
 
     from fastapi import HTTPException
     
     from app.services.bias_analyzer import analyze_article_bias
+    from app.services.nlp_engine import generate_summary, map_sdgs
 
     try:
         uid = PyUUID(article_id)
@@ -182,14 +183,20 @@ async def analyze_article(
     if article is None:
         raise HTTPException(status_code=404, detail="Article not found")
 
+    full_text = f"{article.title}\n\n{article.body or ''}\n\n{article.summary or ''}"
+
     bias_result = await analyze_article_bias(
         title=article.title,
         body=article.body,
         summary=article.summary,
     )
+    ai_summary = await generate_summary(full_text)
+    sdg_tags = await map_sdgs(full_text)
 
     article.bias_score = bias_result.score
     article.bias_label = bias_result.label
+    article.ai_summary = ai_summary
+    article.sdg_tags = sdg_tags
     
     await db.commit()
     await db.refresh(article)

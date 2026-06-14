@@ -28,8 +28,13 @@ async def aggregate_news_job() -> None:
         logger.exception("Aggregation job failed.")
 
 
+from datetime import datetime, timedelta
+
 def start_scheduler() -> None:
     """Start the APScheduler with the aggregation job."""
+    # Jadwalkan jalan langsung 5 detik setelah server menyala
+    run_now = datetime.now() + timedelta(seconds=5)
+    
     scheduler.add_job(
         aggregate_news_job,
         trigger="interval",
@@ -37,6 +42,7 @@ def start_scheduler() -> None:
         id="aggregate_news",
         replace_existing=True,
         max_instances=1,
+        next_run_time=run_now,
     )
     scheduler.start()
     logger.info("Scheduler started — aggregation every 15 minutes.")

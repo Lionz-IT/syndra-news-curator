@@ -13,6 +13,7 @@ from app.api.routes import health
 from app.api.routes import categories as categories_router
 from app.api.routes import news as news_router
 from app.core.config import get_settings
+from app.services.worker import start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await _seed_categories()
     except Exception:
         logger.warning("Category seeding skipped (DB may not be available yet).", exc_info=True)
+        
+    # Hidupkan robot pengumpul berita otomatis
+    start_scheduler()
+    
     yield
-    # Shutdown: cleanup resources
+    
+    # Matikan robot saat server dimatikan
+    stop_scheduler()
 
 
 def create_app() -> FastAPI:

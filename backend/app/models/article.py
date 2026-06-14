@@ -74,7 +74,6 @@ class Article(Base):
     __table_args__ = (
         Index("ix_articles_source_published", "source", "published_at"),
         Index("ix_articles_language", "language"),
-        Index("ix_articles_region", "region"),
     )
 
     def __repr__(self) -> str:

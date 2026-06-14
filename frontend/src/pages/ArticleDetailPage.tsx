@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useArticle } from "@/hooks/use-articles";
-import { Clock, ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft } from "lucide-react";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,97 +48,97 @@ export default function ArticleDetailPage() {
   }
 
   return (
-    <article className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link to="/feed" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 mb-8 transition-colors">
+    <article className="container mx-auto px-4 py-12 max-w-2xl font-sans bg-white dark:bg-gray-950 min-h-screen">
+      <Link to="/feed" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white mb-12 transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to News Feed
+        Back
       </Link>
 
-      <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+      <header className="mb-10">
+        <div className="flex flex-wrap items-center gap-3 mb-6 font-sans text-xs tracking-wider uppercase">
+          <span className="font-semibold text-gray-900 dark:text-white">
             {article.source}
           </span>
+          <span className="text-gray-300 dark:text-gray-700">&middot;</span>
           {article.bias_label && (
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${biasColor}`}>
+            <span className={`px-2 py-0.5 rounded-sm ${biasColor}`}>
               Bias: {article.bias_label} ({article.bias_score})
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-900 dark:text-white leading-[1.1] mb-8 tracking-tight">
           {article.title}
         </h1>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-y border-gray-200 dark:border-gray-800 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-between py-6 border-y border-gray-100 dark:border-gray-900">
+          <div className="flex flex-col gap-1 text-sm text-gray-500 dark:text-gray-400">
             {article.author && (
-              <span className="font-medium text-gray-900 dark:text-gray-200">By {article.author}</span>
+              <span className="font-medium text-gray-900 dark:text-white">{article.author}</span>
             )}
-            <div className="flex items-center">
-              <Clock className="mr-1.5 h-4 w-4" />
-              {publishedDate}
+            <div className="flex items-center gap-2">
+              <span>{publishedDate}</span>
+              {article.region && (
+                <>
+                  <span className="text-gray-300 dark:text-gray-700">&middot;</span>
+                  <span className="uppercase tracking-wider">{article.region}</span>
+                </>
+              )}
             </div>
-            {article.region && (
-              <span className="uppercase text-xs font-bold tracking-wider">{article.region}</span>
-            )}
           </div>
           
           <a 
             href={article.url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+            className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            title="Read Original"
           >
-            Read Original <ExternalLink className="ml-2 h-4 w-4" />
+            <ExternalLink className="h-5 w-5" />
           </a>
         </div>
       </header>
 
       {article.image_url && (
-        <figure className="mb-10 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
+        <figure className="mb-12">
           <img 
             src={article.image_url} 
-            alt={article.title} 
-            className="w-full h-auto object-cover max-h-[600px]"
+            alt="" 
+            className="w-full h-auto object-cover max-h-[500px]"
           />
         </figure>
       )}
 
       {article.ai_summary && (
-        <div className="mb-10 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-900/30">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 mb-3 flex items-center">
-            <span className="bg-blue-600 text-white rounded px-1.5 py-0.5 mr-2 text-[10px]">AI</span>
-            Executive Summary
+        <div className="mb-12 p-6 bg-gray-50 dark:bg-gray-900 border-l-4 border-black dark:border-white">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3 flex items-center">
+            AI Summary
           </h2>
-          <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+          <p className="font-serif text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
             {article.ai_summary}
           </p>
         </div>
       )}
 
-      <div className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
-        {article.body ? (
-          <p className="whitespace-pre-wrap leading-relaxed">{article.body}</p>
-        ) : article.summary ? (
-          <p className="whitespace-pre-wrap leading-relaxed text-xl text-gray-600 dark:text-gray-400">
-            {article.summary}
-          </p>
+      <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 font-serif leading-relaxed">
+        {article.body && article.body !== "null" ? (
+          <div dangerouslySetInnerHTML={{ __html: article.body }} />
+        ) : article.summary && article.summary !== "null" ? (
+          <div dangerouslySetInnerHTML={{ __html: article.summary }} className="text-2xl font-light text-gray-600 dark:text-gray-400" />
         ) : (
-          <p className="italic text-gray-500">Full article content not available in the feed. Please read the original source.</p>
+          <p className="italic text-gray-400">
+            Teks artikel penuh tidak tersedia di *feed* publik ini. Silakan klik tombol "Read Original" di atas untuk membaca berita selengkapnya langsung di situs sumber.
+          </p>
         )}
       </div>
 
-      <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
-          Tags & Categories
-        </h3>
+      <footer className="mt-16 pt-8 pb-24 border-t border-gray-100 dark:border-gray-900">
         <div className="flex flex-wrap gap-2">
           {article.categories.map(cat => (
             <Link 
               key={cat.id} 
               to={`/feed/${cat.slug}`}
-              className="px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300"
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
             >
               {cat.name}
             </Link>
@@ -146,7 +146,7 @@ export default function ArticleDetailPage() {
           {article.sdg_tags?.map(sdg => (
             <span 
               key={sdg}
-              className="px-3 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
             >
               {sdg}
             </span>
