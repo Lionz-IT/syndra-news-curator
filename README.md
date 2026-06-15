@@ -91,7 +91,16 @@ npm run dev
 * Backend runs at: [http://localhost:8000/docs](http://localhost:8000/docs)
 * Frontend runs at: [http://localhost:5173](http://localhost:5173)
 
-### 4. Run tests
+### 5. Deployment
+
+**Backend (Docker / Render / Railway):**
+A `Dockerfile` is provided in the `backend/` directory. You can deploy it directly to any container-hosting platform. Remember to set the environment variables (especially `DATABASE_URL` and `REDIS_URL`) in your hosting dashboard.
+
+**Frontend (Vercel / Netlify):**
+The frontend is a standard Vite React app. A `vercel.json` is included for easy deployment.
+1. Connect your GitHub repo to Vercel.
+2. Set the Build Command to `npm run build` and Output Directory to `dist`.
+3. Set the Environment Variable `VITE_API_URL` to point to your deployed backend URL.
 
 ```bash
 # Backend
@@ -159,9 +168,9 @@ See [`.env.example`](.env.example) for the full list.
 - [x] **Phase 1** — Data layer & news aggregation (15+ sources, all categories)
 - [x] **Phase 2** — Core frontend (news feed, category navigation, filters, search, i18n)
 - [x] **Phase 3** — AI bias detection engine (universal, all domains)
-- [ ] **Phase 4** — Summarization (RAG) + SDG mapping (energy vertical) + category classifier
-- [ ] **Phase 5** — Personalization, auth, glossary, TTS, full i18n (10+ languages)
-- [ ] **Phase 6** — Hardening, tests, deploy, observability
+- [x] **Phase 4** — Summarization (RAG) + SDG mapping (energy vertical) + category classifier
+- [x] **Phase 5** — Personalization, auth, glossary, TTS, full i18n (10+ languages)
+- [x] **Phase 6** — Hardening, tests, deploy, observability
 
 ---
 

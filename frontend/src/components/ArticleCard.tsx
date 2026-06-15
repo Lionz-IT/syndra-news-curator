@@ -1,11 +1,19 @@
 import { Link } from "react-router-dom";
 import type { Article } from "@/lib/api";
 
+import { BookmarkPlus, BookmarkCheck } from "lucide-react";
+import { useBookmarks, useBookmarkArticle } from "@/hooks/use-bookmarks";
+
 interface ArticleCardProps {
   article: Article;
 }
 
 export default function ArticleCard({ article }: ArticleCardProps) {
+  const { data: bookmarks } = useBookmarks();
+  const { mutate: toggleBookmark } = useBookmarkArticle();
+  
+  const isBookmarked = bookmarks?.some(b => b.id === article.id) || false;
+
   const publishedDate = article.published_at 
     ? new Date(article.published_at).toLocaleDateString(undefined, {
         month: "short",
@@ -61,6 +69,17 @@ export default function ArticleCard({ article }: ArticleCardProps) {
               </span>
             </Link>
           ))}
+          <button 
+            onClick={(e) => { e.preventDefault(); toggleBookmark({ articleId: article.id, isBookmarked }); }}
+            className="ml-auto p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title={isBookmarked ? "Remove Bookmark" : "Save Article"}
+          >
+            {isBookmarked ? (
+              <BookmarkCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            ) : (
+              <BookmarkPlus className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
 

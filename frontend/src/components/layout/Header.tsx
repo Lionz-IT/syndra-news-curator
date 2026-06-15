@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
-import { Menu, Moon, Sun, X, Search, Globe, Languages } from "lucide-react";
+import { Menu, Moon, Sun, X, Search, Globe, Languages, LogIn, UserCircle, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { t, i18n } = useTranslation();
+  const { user, openAuthModal, logout } = useAuth();
 
   // Quick implementation for dark mode toggle (can be enhanced later)
   useEffect(() => {
@@ -68,6 +71,45 @@ export default function Header() {
           >
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
+
+          <div className="relative">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <UserCircle className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                </button>
+                
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-12 w-48 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-xl py-2 flex flex-col z-50">
+                    <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-2">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {user.full_name || user.email.split('@')[0]}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <button 
+                      onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={openAuthModal}
+                className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-black dark:text-black dark:bg-white rounded hover:opacity-80 transition-opacity"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </button>
+            )}
+          </div>
           
           <button 
             className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -98,6 +140,29 @@ export default function Header() {
             <Languages className="h-4 w-4" />
             Language: {i18n.language.substring(0, 2)}
           </button>
+          {!user ? (
+            <button
+              onClick={() => {
+                openAuthModal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 text-base font-medium text-blue-600 dark:text-blue-400 w-full text-left"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign In / Register
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                logout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 text-base font-medium text-red-600 dark:text-red-400 w-full text-left"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </button>
+          )}
         </div>
       )}
     </header>

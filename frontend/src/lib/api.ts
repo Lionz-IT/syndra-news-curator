@@ -131,4 +131,32 @@ export async function fetchArticleById(id: string): Promise<Article> {
   return data;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  full_name: string | null;
+}
+
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  article_id: string;
+  created_at: string;
+}
+
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    localStorage.setItem("token", token);
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+    localStorage.removeItem("token");
+  }
+};
+
+const initialToken = localStorage.getItem("token");
+if (initialToken) {
+  setAuthToken(initialToken);
+}
+
 export default api;

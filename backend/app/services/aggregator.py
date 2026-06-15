@@ -102,9 +102,11 @@ async def persist_articles(
     if not articles:
         return 0
 
-    # Collect all content hashes to check existing
+    # Collect all content hashes and URLs to check existing
     hashes = [a.content_hash for a in articles if a.content_hash]
+    urls = [a.url for a in articles if a.url]
     existing_hashes: set[str] = set()
+    existing_urls: set[str] = set()
 
     if hashes:
         result = await session.execute(
@@ -112,11 +114,19 @@ async def persist_articles(
         )
         existing_hashes = {row[0] for row in result.all() if row[0]}
 
+    if urls:
+        result = await session.execute(
+            select(Article.url).where(Article.url.in_(urls))
+        )
+        existing_urls = {row[0] for row in result.all() if row[0]}
+
     category_cache: Dict[str, Category] = {}
     inserted = 0
 
     for article_data in articles:
         if article_data.content_hash and article_data.content_hash in existing_hashes:
+            continue
+        if article_data.url and article_data.url in existing_urls:
             continue
 
         full_text = f"{article_data.title}\n\n{article_data.body or ''}\n\n{article_data.summary or ''}"
@@ -162,6 +172,8 @@ async def persist_articles(
 
         if article_data.content_hash:
             existing_hashes.add(article_data.content_hash)
+        if article_data.url:
+            existing_urls.add(article_data.url)
 
     if inserted:
         await session.flush()

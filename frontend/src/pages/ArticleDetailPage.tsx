@@ -1,10 +1,40 @@
 import { useParams, Link } from "react-router-dom";
 import { useArticle } from "@/hooks/use-articles";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, BookmarkPlus, BookmarkCheck, Play, Square } from "lucide-react";
+import { useBookmarks, useBookmarkArticle } from "@/hooks/use-bookmarks";
+import { useState, useEffect } from "react";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: article, isLoading, isError } = useArticle(id);
+  
+  const { data: bookmarks } = useBookmarks();
+  const { mutate: toggleBookmark } = useBookmarkArticle();
+  
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [speechSynthesis] = useState(() => window.speechSynthesis);
+
+  const isBookmarked = article ? (bookmarks?.some(b => b.id === article.id) || false) : false;
+
+  useEffect(() => {
+    return () => {
+      speechSynthesis.cancel();
+    };
+  }, [speechSynthesis]);
+
+  const toggleSpeech = () => {
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else if (article) {
+      const textToRead = `${article.title}. ${article.ai_summary || article.body || article.summary}`;
+      const utterance = new SpeechSynthesisUtterance(textToRead);
+      utterance.lang = article.language === "en" ? "en-US" : "id-ID";
+      utterance.onend = () => setIsPlaying(false);
+      speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -87,15 +117,31 @@ export default function ArticleDetailPage() {
             </div>
           </div>
           
-          <a 
-            href={article.url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            title="Read Original"
-          >
-            <ExternalLink className="h-5 w-5" />
-          </a>
+          <div className="flex gap-2">
+            <button 
+              onClick={toggleSpeech}
+              className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              title={isPlaying ? "Stop Reading" : "Read Aloud"}
+            >
+              {isPlaying ? <Square className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+            </button>
+            <button 
+              onClick={() => toggleBookmark({ articleId: article.id, isBookmarked })}
+              className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              title={isBookmarked ? "Remove Bookmark" : "Save Article"}
+            >
+              {isBookmarked ? <BookmarkCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" /> : <BookmarkPlus className="h-5 w-5" />}
+            </button>
+            <a 
+              href={article.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              title="Read Original"
+            >
+              <ExternalLink className="h-5 w-5" />
+            </a>
+          </div>
         </div>
       </header>
 

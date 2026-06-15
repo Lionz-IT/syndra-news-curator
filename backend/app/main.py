@@ -6,12 +6,15 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import health
 from app.api.routes import categories as categories_router
 from app.api.routes import news as news_router
+from app.api.routes import auth as auth_router
+from app.api.routes import bookmarks as bookmarks_router
 from app.core.config import get_settings
 from app.services.worker import start_scheduler, stop_scheduler
 
@@ -84,6 +87,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     settings = get_settings()
 
+    # ── Sentry Observability ──────────────────────────────
+    if settings.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            environment=settings.ENVIRONMENT,
+            traces_sample_rate=1.0,
+        )
+        logger.info("Sentry initialized for environment: %s", settings.ENVIRONMENT)
+
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
@@ -111,6 +123,8 @@ def create_app() -> FastAPI:
     app.include_router(health.router, prefix="/api")
     app.include_router(categories_router.router, prefix="/api")
     app.include_router(news_router.router, prefix="/api")
+    app.include_router(auth_router.router, prefix="/api")
+    app.include_router(bookmarks_router.router, prefix="/api")
 
     return app
 
