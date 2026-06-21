@@ -11,7 +11,7 @@ export default function CategoryNav({ activeCategory }: CategoryNavProps) {
 
   if (isLoading) {
     return (
-      <div className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 overflow-hidden">
+      <div className="w-full bg-white dark:bg-gray-950 overflow-hidden">
         <div className="container mx-auto px-4 h-12 flex items-center gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-4 w-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
@@ -24,7 +24,7 @@ export default function CategoryNav({ activeCategory }: CategoryNavProps) {
   if (!categoryData || categoryData.items.length === 0) return null;
 
   return (
-    <div className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 overflow-x-auto no-scrollbar">
+    <div className="w-full bg-white dark:bg-gray-950 overflow-x-auto no-scrollbar shadow-[0_1px_0_0_rgba(0,0,0,0.04)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.04)]">
       <nav className="container mx-auto px-4 h-14 flex items-center gap-6 min-w-max">
         <Link
           to="/feed"

@@ -32,7 +32,7 @@ export default function HomePage() {
 
   return (
     <div className="flex-1 w-full bg-white dark:bg-gray-950 font-sans pb-24">
-      <div className="container mx-auto px-4 mt-6 border-b-2 border-black dark:border-white pb-2 mb-8">
+      <div className="container mx-auto px-4 mt-8 mb-12">
         <h1 className="text-4xl md:text-6xl font-serif font-bold text-center tracking-tight text-gray-900 dark:text-white">
           Today's Front Page
         </h1>
@@ -40,7 +40,7 @@ export default function HomePage() {
 
       <div className="container mx-auto px-4 max-w-7xl">
         {heroArticle && (
-          <section className="mb-16 border-b border-gray-200 dark:border-gray-800 pb-12">
+          <section className="mb-20 pb-12">
             <Link to={`/article/${heroArticle.id}`} className="group block">
               <div className="flex flex-col md:flex-col gap-6 items-center text-center max-w-4xl mx-auto">
                 <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white leading-tight group-hover:underline decoration-gray-400">
@@ -86,11 +86,10 @@ export default function HomePage() {
         )}
 
         <section className="mt-20 max-w-4xl">
-          <div className="flex items-center gap-4 mb-8">
+          <div className="mb-8">
             <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
               Latest Updates
             </h3>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
           </div>
           
           <div className="flex flex-col">
@@ -116,8 +115,8 @@ export default function HomePage() {
 
 function SectionRow({ title, articles, categorySlug }: { title: string, articles: any[], categorySlug: string }) {
   return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between border-t-2 border-black dark:border-white pt-2 mb-6">
+    <section className="mb-16">
+      <div className="flex items-center justify-between pt-2 mb-6">
         <h3 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
           {title}
         </h3>

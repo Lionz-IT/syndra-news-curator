@@ -101,7 +101,7 @@ export default function ArticleDetailPage() {
           {article.title}
         </h1>
 
-        <div className="flex items-center justify-between py-6 border-y border-gray-100 dark:border-gray-900">
+        <div className="flex items-center justify-between py-6 mb-2">
           <div className="flex flex-col gap-1 text-sm text-gray-500 dark:text-gray-400">
             {article.author && (
               <span className="font-medium text-gray-900 dark:text-white">{article.author}</span>
@@ -156,7 +156,7 @@ export default function ArticleDetailPage() {
       )}
 
       {article.ai_summary && (
-        <div className="mb-12 p-6 bg-gray-50 dark:bg-gray-900 border-l-4 border-black dark:border-white">
+        <div className="mb-12 p-6 bg-gray-50 dark:bg-gray-900/50 border-l-2 border-gray-300 dark:border-gray-700">
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3 flex items-center">
             AI Summary
           </h2>
@@ -178,7 +178,7 @@ export default function ArticleDetailPage() {
         )}
       </div>
 
-      <footer className="mt-16 pt-8 pb-24 border-t border-gray-100 dark:border-gray-900">
+      <footer className="mt-16 pt-8 pb-24">
         <div className="flex flex-wrap gap-2">
           {article.categories.map(cat => (
             <Link 

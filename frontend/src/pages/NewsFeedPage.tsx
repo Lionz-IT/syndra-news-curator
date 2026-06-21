@@ -45,7 +45,7 @@ export default function NewsFeedPage() {
       <CategoryNav activeCategory={category} />
       
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <div className="flex flex-col mb-10 gap-6 border-b border-gray-100 dark:border-gray-900 pb-8">
+          <div className="flex flex-col mb-10 gap-6 pb-8">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white capitalize tracking-tight">
             {category ? `${category.replace("-", " ")}` : "Latest News"}
           </h1>
@@ -65,7 +65,7 @@ export default function NewsFeedPage() {
         {isLoading ? (
           <div className="flex flex-col gap-8">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-40 rounded bg-gray-50 dark:bg-gray-900 animate-pulse border-b border-gray-100 dark:border-gray-800 pb-8" />
+              <div key={i} className="h-40 rounded bg-gray-50 dark:bg-gray-900 animate-pulse mb-4" />
             ))}
           </div>
         ) : isError ? (

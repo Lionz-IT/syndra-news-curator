@@ -29,7 +29,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   }
 
   return (
-    <article className="flex items-start gap-4 py-6 border-b border-gray-100 dark:border-gray-800 group">
+    <article className="flex items-start gap-4 py-6 group">
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-2 text-xs font-sans">
           <span className="font-semibold text-gray-900 dark:text-white uppercase tracking-wide">

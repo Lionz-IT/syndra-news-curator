@@ -12,7 +12,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+      <footer className="bg-white dark:bg-gray-950 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
         <div className="container mx-auto px-4">
           &copy; {new Date().getFullYear()} Syndra AI News Platform.
         </div>
