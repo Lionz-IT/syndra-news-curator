@@ -1,11 +1,14 @@
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useArticle } from "@/hooks/use-articles";
 import { ExternalLink, ArrowLeft, BookmarkPlus, BookmarkCheck, Play, Square } from "lucide-react";
 import { useBookmarks, useBookmarkArticle } from "@/hooks/use-bookmarks";
+import { sanitizeHtml, hasContent } from "@/lib/sanitize";
 import { useState, useEffect } from "react";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const { data: article, isLoading, isError } = useArticle(id);
   
   const { data: bookmarks } = useBookmarks();
@@ -54,7 +57,7 @@ export default function ArticleDetailPage() {
   if (isError || !article) {
     return (
       <div className="container mx-auto px-4 py-12 text-center text-red-500">
-        Article not found or failed to load.
+        {t("article.not_found")}
       </div>
     );
   }
@@ -68,7 +71,7 @@ export default function ArticleDetailPage() {
         hour: "2-digit",
         minute: "2-digit"
       })
-    : "Unknown date";
+    : t("article.unknown_date");
 
   let biasColor = "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
   if (article.bias_score !== null) {
@@ -81,7 +84,7 @@ export default function ArticleDetailPage() {
     <article className="container mx-auto px-4 py-12 max-w-2xl font-sans bg-white dark:bg-gray-950 min-h-screen">
       <Link to="/feed" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white mb-12 transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {t("article.back")}
       </Link>
 
       <header className="mb-10">
@@ -92,7 +95,7 @@ export default function ArticleDetailPage() {
           <span className="text-gray-300 dark:text-gray-700">&middot;</span>
           {article.bias_label && (
             <span className={`px-2 py-0.5 rounded-sm ${biasColor}`}>
-              Bias: {article.bias_label} ({article.bias_score})
+              {t("article.bias")}: {article.bias_label} ({article.bias_score})
             </span>
           )}
         </div>
@@ -121,14 +124,14 @@ export default function ArticleDetailPage() {
             <button 
               onClick={toggleSpeech}
               className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              title={isPlaying ? "Stop Reading" : "Read Aloud"}
+              title={isPlaying ? t("article.stop_reading") : t("article.read_aloud")}
             >
               {isPlaying ? <Square className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
             </button>
             <button 
               onClick={() => toggleBookmark({ articleId: article.id, isBookmarked })}
               className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              title={isBookmarked ? "Remove Bookmark" : "Save Article"}
+              title={isBookmarked ? t("article.remove_bookmark") : t("article.save_article")}
             >
               {isBookmarked ? <BookmarkCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" /> : <BookmarkPlus className="h-5 w-5" />}
             </button>
@@ -137,7 +140,7 @@ export default function ArticleDetailPage() {
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              title="Read Original"
+              title={t("article.read_original")}
             >
               <ExternalLink className="h-5 w-5" />
             </a>
@@ -149,8 +152,9 @@ export default function ArticleDetailPage() {
         <figure className="mb-12">
           <img 
             src={article.image_url} 
-            alt="" 
+            alt={article.title}
             className="w-full h-auto object-cover max-h-[500px]"
+            onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
           />
         </figure>
       )}
@@ -158,7 +162,7 @@ export default function ArticleDetailPage() {
       {article.ai_summary && (
         <div className="mb-12 p-6 bg-gray-50 dark:bg-gray-900/50 border-l-2 border-gray-300 dark:border-gray-700">
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-            AI Summary
+            {t("article.ai_summary")}
           </h2>
           <p className="font-serif text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
             {article.ai_summary}
@@ -167,13 +171,13 @@ export default function ArticleDetailPage() {
       )}
 
       <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 font-serif leading-relaxed">
-        {article.body && article.body !== "null" ? (
-          <div dangerouslySetInnerHTML={{ __html: article.body }} />
-        ) : article.summary && article.summary !== "null" ? (
-          <div dangerouslySetInnerHTML={{ __html: article.summary }} className="text-2xl font-light text-gray-600 dark:text-gray-400" />
+        {hasContent(article.body) ? (
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.body) }} />
+        ) : hasContent(article.summary) ? (
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.summary) }} className="text-2xl font-light text-gray-600 dark:text-gray-400" />
         ) : (
           <p className="italic text-gray-400">
-            Teks artikel penuh tidak tersedia di *feed* publik ini. Silakan klik tombol "Read Original" di atas untuk membaca berita selengkapnya langsung di situs sumber.
+            {t("article.full_text_unavailable")}
           </p>
         )}
       </div>

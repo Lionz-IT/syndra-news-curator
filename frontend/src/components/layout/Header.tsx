@@ -1,26 +1,53 @@
 import { Link } from "react-router-dom";
 import { Menu, Moon, Sun, X, Search, Globe, Languages, LogIn, UserCircle, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClickOutside } from "@/hooks/use-click-outside";
+
+function getInitialDarkMode(): boolean {
+  const stored = localStorage.getItem("theme");
+  if (stored === "dark") return true;
+  if (stored === "light") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(getInitialDarkMode);
   const { t, i18n } = useTranslation();
   const { user, openAuthModal, logout } = useAuth();
 
-  // Quick implementation for dark mode toggle (can be enhanced later)
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const closeUserMenu = useCallback(() => setIsUserMenuOpen(false), []);
+  useClickOutside(userMenuRef, closeUserMenu);
+
+  // Apply dark mode class on mount and changes
   useEffect(() => {
-    if (document.documentElement.classList.contains("dark")) {
-      setIsDark(true);
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
+  }, [isDark]);
+
+  // Listen for OS-level preference changes
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem("theme")) {
+        setIsDark(e.matches);
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   const toggleDarkMode = () => {
-    document.documentElement.classList.toggle("dark");
-    setIsDark(!isDark);
+    setIsDark(prev => !prev);
   };
 
   const toggleLanguage = () => {
@@ -72,7 +99,7 @@ export default function Header() {
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
 
-          <div className="relative">
+          <div className="relative" ref={userMenuRef}>
             {user ? (
               <div className="flex items-center gap-2">
                 <button

@@ -1,8 +1,12 @@
 import { useArticles } from "@/hooks/use-articles";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ArticleCard from "@/components/ArticleCard";
+import { sanitizeHtml, hasContent } from "@/lib/sanitize";
+import type { Article } from "@/lib/api";
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { data: latestNews, isLoading } = useArticles({ page_size: 10 });
   const { data: techNews } = useArticles({ category: "technology", page_size: 30 });
   const { data: worldNews } = useArticles({ category: "world", page_size: 30 });
@@ -12,8 +16,8 @@ export default function HomePage() {
     return (
       <div className="flex-1 w-full bg-white dark:bg-gray-950 min-h-screen flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="h-8 w-64 bg-gray-200 dark:bg-gray-800 rounded"></div>
-          <div className="text-gray-400 font-serif">Loading latest editions...</div>
+          <div className="h-8 w-64 bg-gray-200 dark:bg-gray-800 rounded" />
+          <div className="text-gray-400 font-serif">{t("common.loading_editions")}</div>
         </div>
       </div>
     );
@@ -22,8 +26,7 @@ export default function HomePage() {
   const heroArticle = latestNews?.items.find(a => a.image_url) || latestNews?.items[0];
   const listArticles = latestNews?.items.filter(a => a.id !== heroArticle?.id);
 
-  // Helper untuk mengutamakan artikel bergambar di barisan depan
-  const getBestArticles = (items: any[]) => {
+  const getBestArticles = (items: Article[]): Article[] => {
     if (!items) return [];
     const withImages = items.filter(a => a.image_url);
     const withoutImages = items.filter(a => !a.image_url);
@@ -51,18 +54,20 @@ export default function HomePage() {
                   <div className="w-full aspect-[21/9] bg-gray-100 dark:bg-gray-900 overflow-hidden">
                     <img 
                       src={heroArticle.image_url} 
-                      alt="" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      alt={heroArticle.title}
+                      loading="eager"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                     />
                   </div>
                 )}
                 
                 <div className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-serif max-w-3xl line-clamp-3">
-                  {(heroArticle.summary && heroArticle.summary !== "null") 
-                    ? <div dangerouslySetInnerHTML={{ __html: heroArticle.summary }} /> 
-                    : (heroArticle.body && heroArticle.body !== "null")
-                    ? <div dangerouslySetInnerHTML={{ __html: heroArticle.body }} />
-                    : "Klik untuk membaca selengkapnya..."}
+                  {hasContent(heroArticle.summary)
+                    ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(heroArticle.summary) }} />
+                    : hasContent(heroArticle.body)
+                    ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(heroArticle.body) }} />
+                    : t("common.click_to_read")}
                 </div>
                 <div className="text-xs font-sans text-gray-500 uppercase tracking-widest mt-2">
                   {heroArticle.author ? `BY ${heroArticle.author} · ` : ""}
@@ -103,7 +108,7 @@ export default function HomePage() {
               to="/feed" 
               className="inline-block px-6 py-2 border border-gray-300 dark:border-gray-700 text-sm font-semibold rounded hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
             >
-              Load More Articles
+              {t("common.load_more")}
             </Link>
           </div>
         </section>
@@ -113,7 +118,9 @@ export default function HomePage() {
   );
 }
 
-function SectionRow({ title, articles, categorySlug }: { title: string, articles: any[], categorySlug: string }) {
+function SectionRow({ title, articles, categorySlug }: { title: string; articles: Article[]; categorySlug: string }) {
+  const { t } = useTranslation();
+
   return (
     <section className="mb-16">
       <div className="flex items-center justify-between pt-2 mb-6">
@@ -121,7 +128,7 @@ function SectionRow({ title, articles, categorySlug }: { title: string, articles
           {title}
         </h3>
         <Link to={`/feed/${categorySlug}`} className="text-xs font-sans font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors">
-          More in {title} &rarr;
+          {t("common.more_in", { section: title })} &rarr;
         </Link>
       </div>
       
@@ -133,22 +140,24 @@ function SectionRow({ title, articles, categorySlug }: { title: string, articles
                 <img 
                   src={article.image_url} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  alt="" 
+                  alt={article.title}
+                  loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               </div>
             ) : (
-              <div className="w-full h-1 bg-black dark:bg-white mb-2"></div>
+              <div className="w-full h-1 bg-black dark:bg-white mb-2" />
             )}
             <div>
               <h4 className="font-serif font-bold text-gray-900 dark:text-gray-100 leading-snug group-hover:underline decoration-gray-400">
                 {article.title}
               </h4>
               <div className="text-sm text-gray-500 dark:text-gray-400 font-serif mt-2 line-clamp-3">
-                {(article.summary && article.summary !== "null") 
-                  ? <div dangerouslySetInnerHTML={{ __html: article.summary }} /> 
-                  : (article.body && article.body !== "null")
-                  ? <div dangerouslySetInnerHTML={{ __html: article.body }} />
-                  : "Read full story..."}
+                {hasContent(article.summary)
+                  ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.summary) }} />
+                  : hasContent(article.body)
+                  ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.body) }} />
+                  : t("common.read_full_story")}
               </div>
             </div>
           </Link>
